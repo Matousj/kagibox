@@ -1,0 +1,3544 @@
+/* Definice lokálního aliasu pro DIN 1451 Mittelschrift z CDN */
+@font-face {
+    font-family: 'DIN 1451 Mittelschrift';
+    src: url('https://cdn.jsdelivr.net/gh/OpenDesignFoundation/DIN-1451/DIN-1451-Mittelschrift.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --bg-main: #d3d1cb;          /* Premium warm-clay concrete workbench surface */
+    --border: #bfbcb2;
+    --border-focus: #101820;
+    --text-main: #101820;         /* High-contrast sharp charcoal for print decals */
+    --text-muted: #5b6266;
+    --text-japanese: #101820;
+    --accent: #ff4f00;            /* Primary functional orange */
+    --accent-dim: rgba(255, 79, 0, 0.1);
+    --radius: 3px;              /* Minimal corner radius for the device */
+
+    /* Barvy pro OLED displeje */
+    --screen-bg: #0d0d0d;
+    --screen-bg-hover: #161616;
+    --screen-text: #ffffff;
+    --screen-muted: #666666;
+    --screen-border: #262626;
+
+    /* TE Hardware šasi parametry - Machined single-block sandblasted silver-gray aluminum */
+    --chassis-top: #f5f4ef;      
+    --chassis-bottom: #ebe9e2;    
+    --control-border: rgba(0, 0, 0, 0.16);    
+   
+    /* Globální definice DIN fontu */
+    --font-din: 'DIN 1451 Mittelschrift', 'DIN Alternate', 'DIN 1451', sans-serif;
+}
+
+.beta-badge {
+    color: var(--accent);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    touch-action: manipulation;
+}
+
+html, body {
+    min-height: 100dvh;
+    background-color: var(--bg-main);
+    overflow-x: hidden;
+    max-width: 100%;
+}
+body {
+    position: relative;
+    font-family: var(--font-din);
+    background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+    background-size: 16px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Prevents overflow clipping at negative vertical scroll */
+    align-items: center;
+    padding: 40px 20px;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* INDUSTRIAL MINIMALIST BOOT LOADING SCREEN (TE DESIGN) */
+#loader-screen {
+    position: absolute;
+    inset: 0;
+    background: var(--chassis-top);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-family: var(--font-din);
+    color: var(--text-main);
+    transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+#loader-screen.loaded {
+    animation: crtPowerOn 0.4s cubic-bezier(0.85, 0, 0.15, 1) forwards;
+}
+
+@keyframes crtPowerOn {
+    0% { clip-path: inset(0 0 0 0); opacity: 1; filter: brightness(1); }
+    30% { clip-path: inset(0 0 0 0); opacity: 1; filter: brightness(2) contrast(1.5); }
+    100% { clip-path: inset(50% 0 50% 0); opacity: 0; filter: brightness(3) contrast(2); }
+}
+
+#loader-screen svg rect {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: drawTeSvg 1s cubic-bezier(0.85, 0, 0.15, 1) forwards;
+}
+
+#loader-screen svg circle {
+    opacity: 0;
+    animation: fadeInTe 0.5s ease forwards;
+    animation-delay: 0.6s;
+}
+
+@keyframes drawTeSvg {
+    0% { stroke-dashoffset: 400; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes fadeInTe {
+    to { opacity: 1; }
+}
+
+.progress-bar-container {
+    width: 220px;
+    margin-bottom: 20px;
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 10px;
+    background: rgba(0,0,0,0.06);
+    border: 1px solid var(--control-border);
+    border-radius: 3px;
+    padding: 2px;
+    margin-bottom: 6px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--text-main);
+    border-radius: 1px;
+}
+
+.progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-family: var(--font-din);
+    color: var(--text-muted);
+}
+
+.boot-log-container {
+    width: 220px;
+    height: 32px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    line-height: 1.3;
+    overflow: hidden;
+    text-align: left;
+}
+
+/* CONTAINER WRAPPER FOR HANGER */
+.container-wrapper {
+    position: relative;
+    padding-top: 0;
+    width: 100%;
+    max-width: 440px;
+    margin: auto 0; /* Vertically centers when space allows, and scrolls naturally on small heights */
+}
+
+/* AMBIENT LED PROJECTING ON BACKGROUND */
+.ambient-led-glow {
+    position: absolute;
+    top: 50%;
+    right: 2px; /* Completely hidden behind the physical device chassis */
+    margin-top: -10px;
+    width: 2px;
+    height: 20px;
+    background: transparent;
+    z-index: 1; /* Behind the .container */
+    pointer-events: none;
+    
+    /* The light beam shoots out to the right mechanically */
+    box-shadow: 
+        12px 0 15px 2px rgba(255, 79, 0, 0.8),
+        25px 0 35px 5px rgba(255, 79, 0, 0.25);
+    
+    /* Hard, binary blinking characteristic of industrial TE gear */
+    animation: teMechanicalBlink var(--led-blink-speed, 1.6s) steps(1) infinite;
+}
+
+body.dark-theme .ambient-led-glow {
+    /* Logical dark mode glow: wider dispersion, richer atmospheric falloff */
+    box-shadow: 
+        10px 0 20px 2px rgba(255, 79, 0, 0.75),
+        25px 0 60px 10px rgba(255, 79, 0, 0.3),
+        40px 0 100px 25px rgba(255, 79, 0, 0.15);
+}
+
+@keyframes teMechanicalBlink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* TURN OFF LEDS WHEN DEVICE IS OFF */
+body.power-off .ambient-led-glow {
+    animation: none;
+    opacity: 0;
+    box-shadow: none;
+}
+
+body.power-off .plug-led {
+    fill: #444 !important;
+    filter: none !important;
+}
+
+/* Realistic light reflection off desk surface */
+.plug-floor-glow {
+    mix-blend-mode: normal; /* Better for colored light on a light gray desk */
+    opacity: 0.65;
+    transition: opacity 0.3s ease;
+}
+
+body.dark-theme .plug-floor-glow {
+    mix-blend-mode: screen; /* Light additive on dark background */
+    opacity: 0.65;
+}
+
+body.power-off .plug-floor-glow {
+    opacity: 0 !important;
+}
+
+/* FAST BOOT FLICKER */
+body.device-booting .ambient-led-glow {
+    animation-duration: 0.1s;
+}
+/* BATTERY POWER MODE & SLEEP STATES */
+.container #oled-canvas,
+.container #oled-overlay,
+.container #generated-password,
+.container .strength-wrapper,
+.ambient-led-glow,
+.custom-checkbox {
+    transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
+}
+
+body.battery-mode #oled-canvas,
+body.battery-mode #oled-overlay,
+body.battery-mode #generated-password,
+body.battery-mode .strength-wrapper {
+    opacity: 0.7;
+}
+
+body.battery-mode .ambient-led-glow {
+    opacity: 0.45;
+}
+
+body.battery-mode .custom-checkbox {
+    filter: brightness(0.85);
+    opacity: 0.85;
+}
+
+body.device-sleeping #oled-canvas,
+body.device-sleeping #oled-overlay,
+body.device-sleeping #generated-password,
+body.device-sleeping .strength-wrapper {
+    opacity: 0.08 !important; /* Faintly visible screen readability */
+}
+
+body.device-sleeping .ambient-led-glow {
+    opacity: 0 !important;
+    animation: none !important; /* Physically stops blinking to save CPU and visual noise */
+}
+
+body.device-sleeping .custom-checkbox {
+    opacity: 0.22 !important; /* Faint keycap color outline */
+    filter: brightness(0.35) grayscale(0.4) !important;
+    box-shadow: none !important; /* Kills active backlighting glows in deep sleep */
+}
+
+/* HARDWARE BODY FRAME */
+.container{
+    width:100%;
+    background: transparent;
+    border-radius: var(--radius);
+    box-shadow: 
+        0 8px 0 #aba9a3, /* Solid volumetric bottom edge of the metal slab */
+        0 12px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 10;
+    transition: box-shadow 0.4s ease;
+}
+
+body.dark-theme .container {
+    box-shadow: 
+        0 8px 0 #12141c, /* Dark anodized bottom edge of the dark edition slab */
+        0 12px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* METAL ASSEMBLY SCREWS */
+.screw {
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d8d6cf 50%, #aba9a2 100%);
+    border-radius: 50%;
+    border: 1.5px solid #aba9a2;
+    position: absolute;
+    z-index: 20;
+    box-shadow: 
+        inset 0 1px 1px #ffffff,
+        0 1px 1px rgba(0,0,0,0.15);
+}
+
+body.dark-theme .screw {
+    background: radial-gradient(circle at 35% 35%, #3a3d46 0%, #1e2026 50%, #0f1013 100%);
+    border-color: #0f1013;
+    box-shadow: 
+        inset 0 1px 1px rgba(255,255,255,0.1),
+        0 1px 1px rgba(0,0,0,0.4);
+}
+
+.screw::before {
+    content: '';
+    position: absolute;
+    top: 3.5px;
+    left: 1.5px;
+    width: 5.5px;
+    height: 1px;
+    background: #374151;
+}
+
+body.dark-theme .screw::before {
+    background: #000000;
+}
+
+.screw.top-left { top: 12px; left: 12px; transform: rotate(34deg); }
+.screw.top-right { top: 12px; right: 12px; transform: rotate(115deg); }
+.screw.bottom-left { bottom: 12px; left: 12px; transform: rotate(-55deg); }
+.screw.bottom-right { bottom: 12px; right: 12px; transform: rotate(72deg); }
+
+/* PROCEDURÁLNÍ ZRNOST PRO PLASTOVÉ ČÁSTI ŠASI */
+.grainy-plastic {
+    position: relative;
+}
+
+.grainy-plastic::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.25;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* TOP CHASSIS (VINTAGE WHITE) */
+header {
+    background: var(--chassis-top);
+    padding: 42px 32px 24px 32px; /* Increased top padding to fit screen prints */
+    border: 1px solid var(--control-border);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative;
+}
+
+/* Screen printed model identifier on top metal plate */
+header::before {
+    content: "MODEL SYSTEM: K.B. II [256-BIT]";
+    position: absolute;
+    top: 14px;
+    left: 32px;
+    font-family: var(--font-din);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+header * {
+    position: relative;
+    z-index: 10;
+}
+
+h1{
+    font-family: 'Space Mono', monospace;
+    font-size: 2.1rem;
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: var(--text-japanese);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 0.95;
+}
+
+h1 .roman-numeral {
+    font-family: inherit;
+    font-weight: 400;
+    font-size: inherit;
+    letter-spacing: -0.18em;
+    margin-left: 2px;
+    display: inline-block;
+    vertical-align: top;
+    line-height: inherit;
+}
+
+.desc{
+    color: var(--accent);
+    font-size: 0.95rem;
+    font-weight: 700;
+    word-spacing: 3px;
+    line-height: 1.1;
+}
+
+header h1,
+header .desc {
+    cursor: pointer;
+}
+
+.container.device-off header h1,
+.container.device-off header .desc {
+    pointer-events: none;
+}
+
+.subtitle {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-top: 8px;
+    opacity: 0.85;
+}
+
+/* SPEAKER GRILLE */
+.speaker-grille {
+    position: absolute;
+    top: 28px; /* Slightly adjusted to align with the new top print padding */
+    right: 32px;
+    width: 45px;
+    height: 15px;
+    background-image: radial-gradient(circle, #101820 1px, transparent 1px);
+    background-size: 5px 5px;
+    opacity: 0.75;
+    z-index: 10;
+}
+
+body.dark-theme .speaker-grille {
+    background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+    opacity: 0.15;
+}
+
+/* EDGE-TO-EDGE OLED DISPLAY (BLACK) */
+.output-section {
+    height: 154px; /* Hard-lock the physical height of the screen */
+    box-sizing: border-box;
+    background: var(--screen-bg);
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    border-left: none;
+    border-right: none;
+    padding: 24px 32px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    position: relative;
+    z-index: 12;
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+#oled-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.22;
+}
+
+#oled-mini-boot {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #ff4f00;
+    text-align: left;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#oled-mini-log {
+    white-space: pre-line;
+    line-height: 1.4;
+}
+
+#oled-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #4c525d;
+}
+
+.oled-corner-top-left {
+    position: absolute;
+    top: 8px; /* Original canvas y: 16, minus text height roughly 8 */
+    left: 12px;
+}
+
+.oled-corner-top-right {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    text-align: right;
+}
+
+.oled-success-text {
+    display: none !important;
+}
+
+#generated-password, .strength-wrapper {
+    position: relative;
+    z-index: 2;
+}
+
+.output-section:hover {
+    background: var(--screen-bg-hover);
+}
+
+
+#generated-password {
+    height: 54px; /* Lock height so it never pushes the UI down */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    word-break: break-all;
+    text-align: center;
+    color: var(--screen-text);
+    transition: color 0.1s ease, background 0.1s ease, transform 0.1s ease;
+    text-shadow: 0 0 3px #0d0d0d, 0 0 6px #0d0d0d, 0 0 12px rgba(255, 255, 255, 0.35);
+    user-select: all;
+    -webkit-user-select: all;
+}
+
+body.dark-theme #generated-password {
+    text-shadow: 0 0 3px #0d0d0d, 0 0 6px #0d0d0d, 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+#generated-password.copied-state,
+body.dark-theme #generated-password.copied-state {
+    color: var(--accent);
+    background: transparent;
+    box-shadow: none;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 3px #0d0d0d, 0 0 6px #0d0d0d, 0 0 12px rgba(255, 79, 0, 0.65);
+    animation: teHardwarePop 0.22s cubic-bezier(0.25, 1, 0.5, 1.2) forwards;
+}
+
+@keyframes teHardwarePop {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scaleY(0.7);
+        filter: brightness(2.2) contrast(1.4);
+    }
+    60% {
+        opacity: 0.9;
+        transform: translateY(-2px) scaleY(1.05);
+        filter: brightness(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+        filter: none;
+    }
+}
+
+/* Hide strength wrapper contents during copied/purged states but keep its top dashed border visible */
+.strength-wrapper.copied-state > :not(.custom-tooltip) {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.strength-wrapper > * {
+    transition: opacity 0.15s ease;
+}
+
+.tooltip-container {
+    position: relative;
+    cursor: help;
+}
+.custom-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: #0a0a0a;
+    color: var(--screen-text);
+    padding: 6px 10px;
+    border: 1px solid var(--control-border);
+    border-radius: 4px;
+    font-family: 'Space Mono', 'Fira Code', monospace;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 50;
+    pointer-events: none;
+    text-align: center;
+}
+.custom-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--control-border) transparent transparent transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+    .tooltip-container:hover .custom-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-6px);
+    }
+}
+
+.strength-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px dashed var(--screen-border);
+    padding-top: 12px;
+}
+
+.strength-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-din);
+    font-size: 0.75rem;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--screen-muted);
+}
+
+#strength-text {
+    color: #888888;
+}
+
+.strength-bar{
+    width:100%;
+    height:3px;
+    border-radius: 999px;
+    background: var(--screen-border);
+    overflow:hidden;
+}
+
+#strength-fill{
+    width:0%;
+    height:100%;
+    background: var(--accent);
+    transition: 0.2s ease;
+}
+
+#strength-feedback {
+    font-family: 'Fira Code', 'Share Tech Mono', monospace;
+    font-weight: 400;
+    font-size: 0.68rem;
+    letter-spacing: -0.01em;
+    color: var(--screen-muted);
+    line-height: 1.4;
+    min-height: 34px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+#strength-feedback.fade-out {
+    opacity: 0 !important;
+}
+
+@media (max-width: 480px) {
+    #strength-feedback {
+        font-size: 0.62rem;
+        letter-spacing: -0.015em;
+    }
+}
+
+/* BOTTOM CHASSIS (WARM GREY #908E8A) */
+.controls-area {
+    background: var(--chassis-bottom);
+    padding: 28px 32px 42px 32px; /* Increased bottom padding for screen prints */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--control-border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: 
+        inset 0 1px 0px rgba(255,255,255,0.18),
+        inset 0 -1px 0px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* Screen printed engineering regulatory text decals on bottom metal plate */
+.controls-area::before {
+    content: "KAGIBOX DIVISION // PO-256 SECURE ENGINE";
+    position: absolute;
+    bottom: 12px;
+    left: 32px;
+    font-family: var(--font-din);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.controls-area::after {
+    content: "DESIGN BY TE IN SWEDEN";
+    position: absolute;
+    bottom: 12px;
+    right: 32px;
+    font-family: var(--font-din);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.te-header-decal-link {
+    position: absolute;
+    top: 14px;
+    right: 32px;
+    font-family: var(--font-din);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-transform: uppercase;
+    z-index: 20;
+    cursor: pointer;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.te-header-decal-link:hover {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.container.device-off .te-header-decal-link {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+.controls-area * {
+    position: relative;
+    z-index: 10;
+}
+
+/* SEGMENTED RECTANGLE SWITCH */
+.mode-capsule {
+    display: flex;
+    background: #d8d6cf; /* Recessed key frame background */
+    padding: 2.5px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    border: 1px solid var(--control-border);
+    box-shadow: 
+        inset 0 1.5px 3.5px rgba(0,0,0,0.15);
+}
+
+.mode-btn {
+    flex: 1;
+    background: #e2e0d8 !important;
+    border: none;
+    font-family: var(--font-din);
+    color: #5c6266 !important; /* Muted gray for inactive button label */
+    padding: 8px;
+    font-size: 0.8rem;
+    font-weight: 700; /* Crisp TE weight */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 1px;
+    cursor: pointer;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 2px) 0 var(--border),
+        inset 0 1px 0 #ffffff;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.mode-btn.active {
+    background: #ffffff !important;
+    color: #101820 !important;
+    transform: translateY(1.5px);
+    box-shadow: 
+        0 0.5px 0 var(--border),
+        inset 0 1px 2.5px rgba(0,0,0,0.12) !important;
+}
+
+/* FORM FIELDS */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* MECHANICAL FADER (SLIDER) STYLE */
+.fader-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 24px;
+    box-shadow: none;
+}
+
+.fader-container::after {
+    content: '';
+    display: block;
+    height: 4px;
+    width: 100%;
+    margin-top: 4px;
+    background-image: linear-gradient(to right, var(--control-border) 1px, transparent 1px);
+    background-size: 5% 100%;
+    opacity: 0.55;
+}
+
+.fader-label-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* CUSTOM TE SLIDER RAIL */
+input[type="range"].te-fader {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    margin: 8px 0 0 0;
+    cursor: pointer;
+}
+
+/* Chrome/Safari fader track */
+input[type="range"].te-fader::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #d8d6cf; /* light grey slot base */
+    border: 1px solid #bfbcb2; /* slot borders */
+    border-radius: 1px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.12);
+}
+
+/* Chrome/Safari fader cap */
+input[type="range"].te-fader::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 20px;
+    background: linear-gradient(to right, #ff4f00 45%, #ffffff 45%, #ffffff 55%, #ff4f00 55%);
+    border-radius: 1px;
+    border: 1px solid #cc3c00;
+    box-shadow: 
+        0 2px 4px rgba(0,0,0,0.2), 
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    cursor: pointer;
+    margin-top: -8px; /* Centers the 20px thumb on the 4px track */
+}
+
+/* Firefox fader track */
+input[type="range"].te-fader::-moz-range-track {
+    height: 4px;
+    background: #d8d6cf;
+    border: 1px solid #bfbcb2;
+    border-radius: 1px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.12);
+}
+
+/* Firefox fader cap */
+input[type="range"].te-fader::-moz-range-thumb {
+    width: 12px;
+    height: 20px;
+    background: linear-gradient(to right, #ff4f00 45%, #ffffff 45%, #ffffff 55%, #ff4f00 55%);
+    border-radius: 1px;
+    border: 1px solid #cc3c00;
+    box-shadow: 
+        0 2px 4px rgba(0,0,0,0.2), 
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+label {
+    font-family: var(--font-din);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-main);
+}
+
+/* DIGITAL WATCH DISPLAY FOR SIZE INDICATOR */
+.length-val {
+    font-family: 'Share Tech Mono', 'Space Mono', monospace;
+    font-weight: 400;
+    color: #e5e7eb;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+    min-width: 32px;
+    text-align: center;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    position: relative;
+}
+
+/* MINIMAL CHECKBOX CHIPS */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+    /* Unified TE Orange indicator color for all keycaps in light mode */
+    --te-color: #ff4f00;
+    --te-glow: rgba(255, 79, 0, 0.65);
+    --te-glow-hover: rgba(255, 79, 0, 0.8);
+}
+
+/* TE Color Coding - Backlit Silicone Colors (Only in Dark Mode per user request) */
+body.dark-theme .checkbox-grid .custom-checkbox:nth-child(1) { --te-color: #007aff; --te-glow: rgba(0, 122, 255, 0.65); --te-glow-hover: rgba(0, 122, 255, 0.8); } /* Blue */
+body.dark-theme .checkbox-grid .custom-checkbox:nth-child(2) { --te-color: #10b981; --te-glow: rgba(16, 185, 129, 0.65); --te-glow-hover: rgba(16, 185, 129, 0.8); } /* Green */
+body.dark-theme .checkbox-grid .custom-checkbox:nth-child(3) { --te-color: #ffcc00; --te-glow: rgba(255, 204, 0, 0.65); --te-glow-hover: rgba(255, 204, 0, 0.8); } /* Yellow */
+body.dark-theme .checkbox-grid .custom-checkbox:nth-child(4) { --te-color: #ff4f00; --te-glow: rgba(255, 79, 0, 0.65); --te-glow-hover: rgba(255, 79, 0, 0.8); } /* Orange */
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #ffffff; /* Matte white keycap body when inactive */
+    border: 1px solid var(--control-border);
+    border-radius: 2px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+    font-family: var(--font-din);
+    font-size: 0.85rem;
+    font-weight: 700; /* Crisp TE label weight */
+    color: var(--text-main);
+    text-transform: none;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 var(--border),
+        inset 0 1px 0 #ffffff;
+}
+
+.custom-checkbox:hover {
+    background: #fcfbf7;
+}
+
+.custom-checkbox:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 var(--border),
+        inset 0.5px 1.5px 3px rgba(0,0,0,0.12);
+}
+
+.custom-checkbox input {
+    display: none;
+}
+
+.checkmark {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #bfbcb2; /* Recessed off mechanical indicator */
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+/* Colorless Keycaps when Active (Checked) - LIGHT THEME */
+.checkbox-grid .custom-checkbox:has(input:checked) {
+    transform: translateY(2px);
+    background-color: #ffffff !important;
+    color: var(--text-main) !important;
+    border-color: var(--control-border) !important;
+    box-shadow: 
+        0 1px 0 var(--border),
+        inset 0 1.5px 3px rgba(0, 0, 0, 0.12) !important;
+    text-shadow: none !important;
+}
+
+/* Change checkmark dot into a glowing colored LED indicator when active */
+.checkbox-grid .custom-checkbox:has(input:checked) .checkmark {
+    background: var(--te-color, var(--accent)) !important;
+    box-shadow: 
+        0 0 4px var(--te-color),
+        inset 0 0.5px 0.5px rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Translucent Silicone/Rubber Backlit Keycap when Active (Checked) - DARK THEME */
+body.dark-theme .checkbox-grid .custom-checkbox:has(input:checked) {
+    transform: translateY(2px);
+    background-color: var(--te-color, #ff4f00) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, transparent 80%) !important;
+    color: #121318 !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 
+        0 0 8px var(--te-glow, rgba(255, 79, 0, 0.45)),
+        0 1px 0 #13151a,
+        inset 0 1.5px 3px rgba(0, 0, 0, 0.4) !important;
+    filter: brightness(0.85); /* Matte organic glow instead of blinding neon */
+    text-shadow: none;
+}
+
+/* Hover state for checked silicone keycaps */
+body.dark-theme .checkbox-grid .custom-checkbox:has(input:checked):hover {
+    filter: brightness(1.1);
+}
+
+body.dark-theme .checkbox-grid .custom-checkbox:has(input:checked) .checkmark {
+    background: #121318 !important;
+    border-color: #121318 !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Disable battery dimming on checkboxes in dark theme so they stay full opacity/brightness */
+body.dark-theme.battery-mode .custom-checkbox {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+body.dark-theme.battery-mode .checkbox-grid .custom-checkbox:has(input:checked) {
+    background-color: #282c37 !important;
+    background-image: none !important;
+    color: #f1f5f9 !important;
+    border-color: #3a3f4f !important;
+    box-shadow: 
+        0 1px 0 #13151a,
+        inset 0 1.5px 3px rgba(0, 0, 0, 0.4) !important;
+    filter: none !important;
+}
+
+body.dark-theme.battery-mode .checkbox-grid .custom-checkbox:has(input:checked) .checkmark {
+    background: var(--te-color) !important;
+    border-color: var(--te-color) !important;
+    box-shadow: 0 0 6px var(--te-glow) !important;
+}
+
+/* In sleep mode, checkboxes and their checkmarks (toggle indicators) dim down */
+body.device-sleeping.dark-theme.battery-mode .custom-checkbox {
+    opacity: 0.22 !important;
+    filter: brightness(0.35) grayscale(0.4) !important;
+    box-shadow: none !important;
+}
+
+body.device-sleeping.dark-theme.battery-mode .checkbox-grid .custom-checkbox:has(input:checked) .checkmark {
+    box-shadow: none !important;
+}
+
+/* General checkmark sleep state to kill any glowing box-shadows */
+body.device-sleeping .custom-checkbox .checkmark {
+    box-shadow: none !important;
+}
+
+
+/* BUTTONS */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: var(--text-main);
+    color: #ffffff;
+    font-family: var(--font-din);
+    font-size: 0.8rem;
+    font-weight: 700 !important; /* Crisp TE weight */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--control-border);
+    cursor: pointer;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #8b8883,
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+.btn-primary:hover {
+    background: #243547;
+}
+
+.btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 #8b8883,
+        inset 0 1.5px 3px rgba(0,0,0,0.3);
+}
+
+/* PURGE BUFFER BUTTON - LIGHT MODE (Solid orange for high contrast on warm grey chassis) */
+.btn-primary.btn-purge {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #cc3c00,
+        inset 0 1px 0 rgba(255,255,255,0.25) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    outline: none !important;
+    font-weight: 700 !important;
+}
+
+.btn-primary.btn-purge:hover {
+    background: #e04500 !important; /* Slightly darker orange */
+}
+
+.btn-primary.btn-purge:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #cc3c00,
+        inset 0 1.5px 3px rgba(0,0,0,0.3) !important;
+    background: #c73d00 !important;
+}
+
+/* PURGE BUFFER BUTTON - DARK MODE (Glowing outline on charcoal chassis) */
+body.dark-theme .btn-primary.btn-purge {
+    background: transparent !important;
+    color: var(--accent) !important;
+    text-shadow: 0 0 8px rgba(255, 79, 0, 0.6) !important;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #0f1013,
+        inset 0 0 0 2px var(--accent) !important;
+    border: none !important;
+    outline: none !important;
+    font-weight: 700 !important;
+}
+
+body.dark-theme .btn-primary.btn-purge:hover {
+    background: rgba(255, 79, 0, 0.1) !important;
+}
+
+body.dark-theme .btn-primary.btn-purge:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #0f1013,
+        inset 0 0 0 2px var(--accent),
+        inset 0 1.5px 3px rgba(0,0,0,0.5) !important;
+    background: rgba(255, 79, 0, 0.2) !important;
+}
+
+.btn-primary.btn-purge:focus,
+body.dark-theme .btn-primary.btn-purge:focus,
+.btn-primary.btn-purge:focus-visible,
+body.dark-theme .btn-primary.btn-purge:focus-visible {
+    outline: none !important;
+}
+
+.btn-secondary {
+    background: #ffffff !important;
+    color: var(--text-main) !important;
+    font-family: var(--font-din);
+    font-size: 0.8rem;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--control-border) !important;
+    cursor: pointer;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #bfbcb2,
+        inset 0 1px 0 #ffffff !important;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+    background: #fcfbf7 !important;
+}
+
+.btn-secondary:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #bfbcb2,
+        inset 0 1.5px 3px rgba(0,0,0,0.12) !important;
+}
+
+
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: transparent !important;
+    display: none;
+    z-index: 100;
+    opacity: 0;
+}
+
+.modal-overlay.active {
+    display: block;
+    animation: fadeInOverlay 0.2s ease forwards;
+}
+
+.modal-overlay.closing {
+    display: block;
+    animation: fadeOutOverlay 0.2s ease forwards;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 15, 20, 0.4);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.modal-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.modal-flex-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    padding: 20px;
+    overflow-y: auto;
+    pointer-events: none;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOutOverlay {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.modal-box {
+    background: var(--chassis-top);
+    border: 1px solid var(--control-border);
+    border-radius: 2px;
+    padding: 28px;
+    width: 100%;
+    max-width: 400px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    font-family: var(--font-din);
+    box-shadow: 
+        0 8px 0 #aba9a3,
+        0 12px 24px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.subtle-link {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    opacity: 0.6;
+    display: inline-block;
+}
+.subtle-link:hover {
+    color: var(--accent);
+    opacity: 1;
+}
+
+.spec-box {
+    max-width: 420px !important;
+    padding: 28px;
+    position: relative;
+}
+
+.spec-header {
+    text-align: left;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+    margin-top: 10px;
+}
+
+.spec-header h1 {
+    margin-bottom: 14px;
+}
+
+.specs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.spec-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 6px;
+}
+
+.spec-label {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+}
+
+.spec-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-main);
+    text-align: right;
+}
+
+
+
+.modal-box * {
+    position: relative;
+    z-index: 2;
+}
+
+.modal-box h2 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+    font-weight: normal;
+}
+
+.modal-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+}
+
+.advanced-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+.advanced-group {
+    background: #d8d6cf; /* Recessed slot background */
+    border: 1px solid var(--control-border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    box-shadow: inset 0 1.5px 3.5px rgba(0,0,0,0.15);
+}
+
+/* TE Industrial Typography */
+.te-modal-title {
+    font-family: 'Fira Code', monospace;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: 0.05em;
+}
+
+.te-modal-desc {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin: 4px 0 0 0;
+    letter-spacing: 0.1em;
+}
+
+.te-section-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    margin-left: 2px;
+}
+
+.te-btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Fira Code', monospace;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.2s;
+}
+.te-btn-outline:hover {
+    color: var(--text-main);
+    border-color: var(--text-main);
+}
+.te-btn-outline.copied-active {
+    color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+
+/* TE Mechanical Toggle */
+.te-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    cursor: pointer;
+    border-bottom: 1px dashed var(--control-border);
+}
+.te-toggle:last-child {
+    border-bottom: none;
+}
+.te-toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.te-toggle-title {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.te-toggle-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+/* Hardware Switch */
+.te-switch {
+    position: relative;
+    width: 34px;
+    height: 18px;
+}
+.te-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.te-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #c7c5be;
+    border: 1px solid var(--control-border);
+    transition: background-color 0.15s ease;
+    border-radius: 2px;
+    box-shadow: inset 0 1.5px 3px rgba(0,0,0,0.18);
+    box-sizing: border-box;
+}
+.te-slider:before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    height: 12px;
+    width: 12px;
+    background-color: #ffffff;
+    border: 1px solid #bfbcb2;
+    transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 1px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+.te-switch input:checked + .te-slider {
+    background-color: var(--accent) !important;
+    border-color: rgba(0,0,0,0.15) !important;
+}
+.te-switch input:checked + .te-slider:before {
+    transform: translateX(16px);
+    border-color: rgba(0,0,0,0.15);
+}
+
+/* Terminal Input */
+.te-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 4px;
+    border-bottom: 1px dashed var(--control-border);
+}
+.te-input-group:last-child {
+    border-bottom: none;
+}
+.te-input-label {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-weight: 700;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.te-input-wrapper {
+    display: flex;
+    align-items: center;
+}
+.te-prompt {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    margin-right: 8px;
+    font-size: 0.85rem;
+}
+.te-terminal-input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    width: 100%;
+    outline: none;
+}
+.te-terminal-input::placeholder {
+    color: rgba(255,255,255,0.2);
+}
+
+/* Hardware Buttons */
+.te-btn-hazard {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Fira Code', monospace;
+    padding: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 14px;
+    border-radius: 2px;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 var(--accent),
+        inset 0 1px 0 #ffffff;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+.te-btn-hazard:hover {
+    background: #fffcfb;
+}
+.te-btn-hazard:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 var(--accent),
+        inset 1.5px 1.5px 3px rgba(255, 79, 0, 0.15) !important;
+}
+.te-btn-commit {
+    width: 100%;
+    background: var(--text-main);
+    border: 1px solid var(--control-border);
+    color: #ffffff;
+    font-family: 'Fira Code', monospace;
+    padding: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 2px;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #8b8883,
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+.te-btn-commit:hover {
+    background: #243547;
+}
+.te-btn-commit:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 #8b8883,
+        inset 1.5px 1.5px 3px rgba(0,0,0,0.3) !important;
+}
+.te-link {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+}
+.te-link:hover {
+    color: var(--text-main);
+    text-decoration: underline;
+}
+
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.preset-btn {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: var(--font-din);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 2px) 0 var(--border),
+        inset 0 1px 0 #ffffff;
+}
+
+.settings-checkbox {
+    padding: 6px 12px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.preset-btn:hover {
+    border-color: var(--text-main);
+}
+
+.preset-btn:active {
+    transform: translateY(1.5px);
+    box-shadow: 
+        0 0.5px 0 var(--border),
+        inset 1.5px 1.5px 2px rgba(0,0,0,0.12) !important;
+}
+
+.preset-btn.active {
+    transform: translateY(1.5px);
+    background: var(--text-main) !important;
+    color: #ffffff !important;
+    border-color: var(--text-main) !important;
+    box-shadow: 
+        0 0.5px 0 var(--border),
+        inset 1.5px 1.5px 2.5px rgba(0,0,0,0.3) !important;
+}
+
+.preset-explanations {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--control-border);
+    border-radius: 3px;
+    font-family: 'Space Mono', monospace;
+}
+body.dark-theme .preset-explanations {
+    background: rgba(255, 255, 255, 0.015);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+@media (max-width: 600px) {
+    .preset-explanations {
+        display: none !important;
+    }
+}
+.preset-desc-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.preset-desc-title {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+}
+.preset-desc-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    outline: none;
+    border-radius: 2px;
+    background: #ffffff;
+    color: var(--text-main);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+}
+
+input[type="text"]:focus {
+    border-color: var(--border-focus);
+}
+
+/* DARK MODE CHASSIS LED GLOW STYLES */
+body {
+    transition: background-color 0.4s ease;
+}
+
+html.dark-theme,
+body.dark-theme {
+    /* Transform device chassis variables to premium matte-charcoal anodized metal */
+    --bg-main: #0a0b0d;
+    --chassis-top: #1f222b;
+    --chassis-bottom: #13151a;
+    --control-border: #2a2e3b;
+    --text-main: #f1f5f9;
+    --text-muted: #64748b;
+    --text-japanese: #ff4f00; /* Bright orange pop for the Japanese branding */
+    --border: #3a3f4f;
+
+    /* Background dot grid pattern for technical laboratory workbench aesthetic */
+    background-color: #0a0b0d;
+    background-image: radial-gradient(#1f2430 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+body.dark-theme h1 {
+    color: #ffffff;
+}
+
+body.dark-theme .modal-box {
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 
+        0 8px 0 #12141c,
+        0 12px 24px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Checkbox (keycaps) styling for Dark Edition */
+body.dark-theme .custom-checkbox {
+    background: #282c37;
+    color: #f1f5f9;
+    border: 1px solid #3a3f4f;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #13151a,
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    text-shadow: none; /* No fuzzy text glows */
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+body.dark-theme .custom-checkbox:hover {
+    background: #2f3442;
+    border-color: #555d73;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #13151a,
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .custom-checkbox:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 #13151a,
+        inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Dimmer borders in dark mode to blend with OLED display and remove "sketch" look */
+body.dark-theme header,
+body.dark-theme .controls-area {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-theme header {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+body.dark-theme .controls-area {
+    box-shadow: 
+        inset 0 1px 0px rgba(255,255,255,0.02),
+        inset 0 -1px 0px rgba(0,0,0,0.3);
+}
+
+/* Primary Button (Run Generation) - High Contrast Solid White Keycap style */
+body.dark-theme .btn-primary {
+    background: #ffffff;
+    color: #121318;
+    border: 1px solid #0f1013;
+    font-weight: 700 !important;
+    box-shadow: 
+        0 3px 0 #0f1013,
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: none;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+body.dark-theme .btn-primary:hover {
+    background: #e2e8f0;
+}
+
+body.dark-theme .btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 #0f1013,
+        inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Secondary Button (Filters & Presets) - Dark Translucent keycap with white border */
+body.dark-theme .btn-secondary {
+    background: #282c37 !important;
+    color: #f1f5f9 !important;
+    border: 1px solid #3a3f4f !important;
+    font-weight: 700 !important;
+    box-shadow: 
+        0 3px 0 #0f1013,
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    text-shadow: none;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+body.dark-theme .btn-secondary:hover {
+    background: #2f3442 !important;
+    border-color: #555d73 !important;
+    color: #ffffff !important;
+}
+
+body.dark-theme .btn-secondary:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #0f1013,
+        inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Segmented mode switch capsule */
+body.dark-theme .mode-capsule {
+    background: #0f1013;
+    border-color: #2a2e3b;
+    box-shadow: inset 0 1.5px 3.5px rgba(0,0,0,0.6);
+}
+
+body.dark-theme .mode-btn {
+    background: #181b22 !important;
+    color: #64748b !important;
+    box-shadow: 0 2px 0 #13151a, inset 0 1px 0 rgba(255,255,255,0.03);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+body.dark-theme .mode-btn.active {
+    background: #282c37 !important;
+    color: #ffffff !important;
+    transform: translateY(1.5px);
+    box-shadow: 
+        0 0.5px 0 #13151a,
+        inset 0 1px 2px rgba(0,0,0,0.4) !important;
+}
+
+
+
+/* Fader container slot styling */
+body.dark-theme .fader-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+body.dark-theme .fader-container::after {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px);
+}
+
+body.dark-theme input[type="range"].te-fader::-webkit-slider-runnable-track {
+    background: #0f1013;
+    border-color: #2a2e3b;
+    box-shadow: inset 0 1.5px 2px rgba(0,0,0,0.6);
+}
+
+body.dark-theme input[type="range"].te-fader::-moz-range-track {
+    background: #0f1013;
+    border-color: #2a2e3b;
+    box-shadow: inset 0 1.5px 2px rgba(0,0,0,0.6);
+}
+
+/* Preset buttons in modal matrix */
+body.dark-theme .preset-btn {
+    background: #282c37;
+    color: #f1f5f9;
+    border-color: #3a3f4f;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 2px) 0 #0f1013,
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+
+body.dark-theme .preset-btn:hover {
+    border-color: #555d73;
+    background: #2f3442;
+}
+
+body.dark-theme .preset-btn.active {
+    transform: translateY(1.5px);
+    background: #ffffff !important;
+    color: #121318 !important;
+    border-color: #ffffff !important;
+    box-shadow: 
+        0 0.5px 0 #0f1013,
+        inset 1.5px 1.5px 2.5px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-theme .advanced-group {
+    background: #13151a;
+    border-color: #2a2e3b;
+    box-shadow: inset 0 1.5px 3.5px rgba(0,0,0,0.6);
+}
+
+/* Technical inputs inside advanced matrices */
+body.dark-theme input[type="text"] {
+    background: #13151a;
+    border-color: #3a3f4f;
+    color: #f1f5f9;
+    box-shadow: inset 0 1px 2.5px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme input[type="text"]:focus {
+    border-color: #555d73;
+}
+
+body.dark-theme .te-slider {
+    background-color: #0f1013;
+    border-color: #3a3f4f;
+    box-shadow: inset 0 1.5px 3px rgba(0,0,0,0.5);
+}
+
+body.dark-theme .te-slider:before {
+    background-color: #282c37;
+    border-color: #3a3f4f;
+    box-shadow: 0 1.5px 3px rgba(0,0,0,0.4);
+}
+
+body.dark-theme .te-switch input:checked + .te-slider {
+    background-color: var(--accent) !important;
+    border-color: rgba(0,0,0,0.2) !important;
+}
+
+body.dark-theme .te-switch input:checked + .te-slider:before {
+    background-color: #ffffff !important;
+    border-color: rgba(0,0,0,0.2) !important;
+}
+
+body.dark-theme .te-btn-hazard {
+    background: #282c37 !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #0f1013,
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-theme .te-btn-hazard:hover {
+    background: #2f3442 !important;
+}
+
+body.dark-theme .te-btn-hazard:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #0f1013,
+        inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-theme .te-btn-commit {
+    background: #ffffff !important;
+    color: #121318 !important;
+    border-color: #0f1013 !important;
+    box-shadow: 
+        var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #0f1013,
+        inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+body.dark-theme .te-btn-commit:hover {
+    background: #e2e8f0 !important;
+}
+
+body.dark-theme .te-btn-commit:active {
+    transform: translateY(2px) !important;
+    box-shadow: 
+        0 1px 0 #0f1013,
+        inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* --- SKEUOMORPHIC HARDWARE POWER TOGGLE SWITCH & MOBILE OPTIMIZATIONS --- */
+.power-switch-chassis {
+    position: absolute;
+    right: -13px; /* sticks out from container border */
+    top: 130px; /* aligns next to the OLED screen */
+    width: 14px;
+    height: 54px;
+    background: var(--chassis-bottom); /* matches warm gray chassis */
+    border: 1px solid var(--control-border);
+    border-left: none;
+    border-radius: 0 5px 5px 0;
+    box-shadow: 
+        2px 2px 4px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+    z-index: 5;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+body.dark-theme .power-switch-chassis {
+    background: #1f222b;
+    border-color: #2a2e3b;
+    box-shadow: 
+        2px 2px 5px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.power-label-top, .power-label-bottom {
+    font-family: var(--font-din);
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--text-muted);
+    user-select: none;
+    line-height: 1;
+}
+
+body.dark-theme .power-label-top,
+body.dark-theme .power-label-bottom {
+    color: #64748b;
+}
+
+.power-switch-groove {
+    width: 6px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+.power-switch-knob {
+    width: 6px;
+    height: 14px;
+    background: var(--accent); /* TE Orange */
+    border-radius: 2px;
+    position: absolute;
+    left: 0;
+    top: 0; /* default ON (up) */
+    box-shadow: 
+        0 1px 2px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+    transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1.25), background-color 0.4s ease;
+}
+
+.power-switch-knob.off {
+    transform: translateY(16px); /* travel down for OFF */
+    background: #6b7280; /* dull gray when unpowered */
+    box-shadow: 
+        0 1px 1px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+body.dark-theme .power-switch-knob.off {
+    background: #3e4456;
+}
+
+/* --- POWER STATE (OFF) RULES --- */
+.container.device-off .output-section {
+    background: #000000 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+    pointer-events: none;
+}
+
+.container.device-off #generated-password {
+    color: transparent !important;
+    text-shadow: none !important;
+}
+
+.container.device-off #oled-canvas,
+.container.device-off #oled-overlay {
+    opacity: 0 !important;
+}
+
+.container.device-off #strength-fill {
+    background: #000000 !important;
+    width: 0% !important;
+}
+
+.container.device-off #strength-text,
+.container.device-off #strength-feedback,
+.container.device-off .strength-meta span {
+    color: transparent !important;
+    text-shadow: none !important;
+}
+
+.container.device-off .strength-bar {
+    background: #000000 !important;
+}
+
+.container.device-off .length-val {
+    background: #000000 !important;
+    color: transparent !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.container.device-off .checkmark {
+    background: #000000 !important;
+    box-shadow: none !important;
+    border-color: #000000 !important;
+}
+
+.container.device-off .controls-area {
+    pointer-events: none;
+}
+
+/* Gray out checkbox buttons in OFF state for both themes */
+.container.device-off .custom-checkbox {
+    color: rgba(0, 0, 0, 0.25) !important;
+    background: #d1d5db !important;
+    border-color: #b5babf !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body.dark-theme .container.device-off .custom-checkbox {
+    color: #1e293b !important;
+    background: #1e293b !important;
+    border-color: #0f172a !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Force glowing checked checkmarks off */
+.container.device-off .custom-checkbox input:checked + .checkmark {
+    background: #7c7a76 !important;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.5) !important;
+}
+
+/* Turn off dark mode checked keycap glows */
+body.dark-theme .container.device-off .checkbox-grid .custom-checkbox:has(input:checked) {
+    background-color: #1e293b !important;
+    background-image: none !important;
+    color: #475569 !important;
+    border-color: #0f172a !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+}
+
+body.dark-theme .container.device-off .checkbox-grid .custom-checkbox:has(input:checked) .checkmark {
+    background: #0f172a !important;
+    border-color: #0f172a !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5) !important;
+}
+
+
+
+/* Disable generating button colors */
+.container.device-off .btn-primary {
+    background: #9ca3af !important;
+    color: #4b5563 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body.dark-theme .container.device-off .btn-primary {
+    background: #1e293b !important;
+    color: #475569 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.container.device-off .btn-secondary {
+    background: #9ca3af !important;
+    color: #4b5563 !important;
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body.dark-theme .container.device-off .btn-secondary {
+    background: #1e293b !important;
+    color: #475569 !important;
+    border-color: #0f172a !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.container.device-off .mode-btn {
+    color: rgba(0, 0, 0, 0.25) !important;
+}
+
+body.dark-theme .container.device-off .mode-btn {
+    color: #475569 !important;
+}
+
+.container.device-off .mode-btn.active {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.container.device-off input[type="range"].te-fader::-webkit-slider-thumb {
+    background: #9ca3af !important;
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+}
+
+.container.device-off input[type="range"].te-fader::-moz-range-thumb {
+    background: #9ca3af !important;
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+}
+
+/* --- BOOT FLICKERING STYLES --- */
+.container.device-flicker-off .output-section {
+    background: #000000 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+}
+.container.device-flicker-off #generated-password {
+    color: transparent !important;
+    text-shadow: none !important;
+}
+.container.device-flicker-off #oled-canvas,
+.container.device-flicker-off #oled-overlay {
+    opacity: 0 !important;
+}
+.container.device-flicker-off #strength-fill {
+    background: #000000 !important;
+    width: 0% !important;
+}
+.container.device-flicker-off #strength-text,
+.container.device-flicker-off #strength-feedback,
+.container.device-flicker-off .strength-meta span {
+    color: transparent !important;
+    text-shadow: none !important;
+}
+.container.device-flicker-off .length-val {
+    background: #000000 !important;
+    color: transparent !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* --- MOBILE RESPONSIVE MEDIA QUERIES --- */
+@media (max-width: 480px) {
+    body {
+        padding: 16px 20px; /* Space on left/right so side switch is fully visible */
+    }
+    
+    .container-wrapper {
+        max-width: 100%;
+    }
+    
+    header {
+        padding: 20px 24px 16px 24px; /* Restored tighter padding since decals are hidden */
+    }
+    
+    /* Hide printed model text on mobile for more space and cleaner look */
+    header::before {
+        display: none !important;
+    }
+    .te-header-decal-link {
+        display: none !important;
+    }
+    
+    /* Align speaker dots grid to responsive margins */
+    .speaker-grille {
+        right: 24px;
+        top: 20px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .output-section {
+        height: 124px; /* Shorter screen height to fit on smaller displays */
+        padding: 14px 24px;
+    }
+    
+    #generated-password {
+        height: 48px;
+        line-height: 1.25;
+        padding: 4px 12px;
+        margin-bottom: 8px;
+        font-size: 1.15rem;
+    }
+    
+    /* Compact strength indicators to prevent display height clipping */
+    .strength-wrapper {
+        padding-top: 4px;
+        gap: 4px;
+    }
+    
+    #strength-feedback {
+        min-height: 18px;
+        font-size: 0.58rem;
+        line-height: 1.2;
+    }
+    
+    .strength-meta {
+        font-size: 0.65rem;
+    }
+    
+    .controls-area {
+        padding: 20px 24px 20px 24px; /* Reduced bottom padding since decals are hidden */
+    }
+    
+    /* Hide printed bottom chassis decals on mobile to prevent overlap and let layout breathe */
+    .controls-area::before {
+        display: none !important;
+    }
+    .controls-area::after {
+        display: none !important;
+    }
+    
+    .mode-capsule {
+        margin-bottom: 16px;
+    }
+    
+    .checkbox-grid {
+        margin-bottom: 20px;
+    }
+    
+    .custom-checkbox {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-primary {
+        padding: 12px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-secondary {
+        padding: 10px;
+        font-size: 0.75rem;
+    }
+    
+    .power-switch-chassis {
+        right: -10px; /* Bring inward slightly if screen edges are tight */
+    }
+    
+    /* Position screws closer to the chassis edges for a roomier look */
+    .screw.top-left { top: 6px; left: 6px; }
+    .screw.top-right { top: 6px; right: 6px; }
+    .screw.bottom-left { bottom: 6px; left: 6px; }
+    .screw.bottom-right { bottom: 6px; right: 6px; }
+}
+
+@media (max-width: 360px) {
+    body {
+        padding: 12px 14px;
+    }
+    
+    header {
+        padding: 16px 18px 12px 18px; /* Tight safe padding */
+    }
+    
+    .speaker-grille {
+        right: 18px;
+        top: 16px;
+    }
+    
+    .output-section {
+        height: 116px;
+        padding: 10px 18px;
+    }
+    
+    #generated-password {
+        height: 44px;
+        font-size: 1rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
+    }
+    
+    /* Ultra-compact strength indicators for iPhone SE sizes */
+    .strength-wrapper {
+        padding-top: 2px;
+        gap: 2px;
+    }
+    
+    #strength-feedback {
+        min-height: 14px;
+        font-size: 0.52rem;
+        line-height: 1.15;
+    }
+    
+    .strength-meta {
+        font-size: 0.58rem;
+    }
+    
+    .controls-area {
+        padding: 16px 18px 16px 18px; /* Tighter padding */
+    }
+    
+    .checkbox-grid {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .custom-checkbox {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .preset-btn {
+        font-size: 0.72rem;
+        padding: 6px 8px;
+    }
+    
+    .power-switch-chassis {
+        right: -8px;
+    }
+    
+    /* Position screws extremely close to corners on tiny displays */
+    .screw.top-left { top: 4px; left: 4px; }
+    .screw.top-right { top: 4px; right: 4px; }
+    .screw.bottom-left { bottom: 4px; left: 4px; }
+    .screw.bottom-right { bottom: 4px; right: 4px; }
+}
+
+/* --- SKEUOMORPHIC BRAIDED POWER CABLE (LEFT SIDE PLUG-IN) --- */
+.braided-cable-container {
+    position: absolute;
+    top: 140px; /* Aligns vertically with display section */
+    right: 100%; /* Starts exactly at left edge of the device */
+    margin-right: -10px; /* Overlaps device by 10px so the tip goes inside */
+    width: 2000px; /* Extends infinitely to the left */
+    height: 600px;
+    pointer-events: none;
+    z-index: 5; /* overlays container bezel so plug is on top */
+}
+
+/* Cable Gradient Stoppings (Beige/Grey in light theme, Charcoal/Graphite in dark theme) */
+.cable-stop-1 {
+    stop-color: #d1d5db;
+    transition: stop-color 0.4s ease;
+}
+.cable-stop-2 {
+    stop-color: #f6f4ee;
+    transition: stop-color 0.4s ease;
+}
+
+body.dark-theme .cable-stop-1 {
+    stop-color: #2a2e3b;
+}
+body.dark-theme .cable-stop-2 {
+    stop-color: #1f222b;
+}
+
+/* Braided Stitches colors */
+.cable-dark-braid {
+    stroke: #7c7a76;
+    opacity: 0.45;
+    transition: stroke 0.4s ease;
+}
+body.dark-theme .cable-dark-braid {
+    stroke: #13151a;
+    opacity: 0.6;
+}
+
+.cable-light-braid {
+    stroke: #ffffff;
+    opacity: 0.4;
+    transition: stroke 0.4s ease;
+}
+body.dark-theme .cable-light-braid {
+    stroke: #64748b;
+    opacity: 0.35;
+}
+
+/* Plug Socket Cutout on Device Side Bezel */
+.plug-socket {
+    fill: #0c0d12;
+    stroke: var(--control-border);
+    stroke-width: 0.8px;
+    transition: stroke 0.4s ease;
+}
+
+/* Metal Tip inserted in socket */
+.plug-metal-tip {
+    fill: #9ca3af;
+    transition: fill 0.4s ease;
+}
+body.dark-theme .plug-metal-tip {
+    fill: #4b5563;
+}
+
+/* Plug Connector Housing */
+.plug-housing {
+    fill: #e5e7eb;
+    stroke: #b5babf;
+    stroke-width: 0.8px;
+    transition: fill 0.4s ease, stroke 0.4s ease;
+}
+
+body.dark-theme .plug-housing {
+    fill: #242835;
+    stroke: #13151a;
+}
+
+/* Connector LED indicator */
+.plug-led {
+    fill: #10b981; /* Active power LED */
+    filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.9));
+}
+
+/* Rubber Strain Relief */
+.plug-relief {
+    fill: #7c7a76;
+    transition: fill 0.4s ease;
+}
+
+body.dark-theme .plug-relief {
+    fill: #13151a;
+}
+
+.plug-rib-line {
+    stroke: #4b5563;
+    stroke-width: 1px;
+    transition: stroke 0.4s ease;
+}
+body.dark-theme .plug-rib-line {
+    stroke: #1c1f26;
+}
+
+/* Cable Interactive Unplug Animation */
+#cable-and-plug {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto; /* Required because container has pointer-events: none */
+}
+
+/* When plugging back in, delay the LED turning on */
+#cable-and-plug:not(.disconnected) .plug-led {
+    transition: fill 0.1s ease 0.4s, filter 0.1s ease 0.4s;
+}
+#cable-and-plug:not(.disconnected) .plug-floor-glow {
+    transition: opacity 0.2s ease 0.4s;
+}
+
+#cable-and-plug.disconnected {
+    transform: translateX(-40px);
+}
+
+#cable-and-plug.disconnected .plug-led {
+    fill: #444 !important;
+    filter: none !important;
+    transition: fill 0.1s ease;
+}
+
+#cable-and-plug.disconnected .plug-floor-glow {
+    opacity: 0 !important;
+    transition: opacity 0.1s ease;
+}
+
+@media (max-width: 480px) {
+    #cable-and-plug.disconnected {
+        transform: translateX(-14px);
+    }
+}
+
+
+.cable-shadow-path {
+    stroke: rgba(0,0,0,0.1);
+    transition: stroke 0.4s ease;
+}
+body.dark-theme .cable-shadow-path {
+    stroke: rgba(0,0,0,0.35);
+}
+
+/* Make body hide horizontal overflow to prevent scrollbars from the sweeping cable */
+body {
+    overflow-x: hidden;
+}
+
+/* Prevent scroll chaining from modal to background */
+body.modal-open {
+    /* Removed overflow: hidden because it breaks iOS Safari bottom toolbar translucency */
+}
+@media (min-width: 601px) {
+    body.modal-open {
+        overflow: hidden !important;
+    }
+}
+
+/* On mobile, completely hide the main app when a modal is open to ensure 0 background scrolling */
+@media (max-width: 600px) {
+    body.modal-open .container-wrapper {
+        display: none !important;
+    }
+}
+
+/* FULLSCREEN MODALS ON MOBILE */
+@media (max-width: 600px) {
+    .modal-overlay {
+        padding: 0;
+    }
+
+    .modal-flex-container {
+        padding: 0;
+        align-items: flex-end; /* pop up from bottom */
+    }
+
+    .modal-box {
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        max-width: none;
+        border-radius: 0;
+        border: none;
+        background: var(--chassis-top);
+        overflow-y: auto;
+        padding-top: 0;
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+    }
+    
+    body.dark-theme .modal-box {
+        background: var(--bg-main);
+    }
+    
+    .modal-header.sticky-header {
+        position: relative;
+        background: var(--bg-main);
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        /* Handle iOS notch/status bar gracefully */
+        padding: calc(env(safe-area-inset-top, 16px) + 8px) 20px 16px 20px;
+        border-bottom: 2px solid #ff4f00;
+        margin-bottom: 24px;
+        margin-top: 0;
+        margin-left: 0;
+        margin-right: 0;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .modal-header.sticky-header.spec-header {
+        padding-top: calc(env(safe-area-inset-top, 16px) + 32px);
+    }
+
+    .modal-title-te {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text-main);
+    }
+    
+    /* Hide desktop commit button, show native-style mobile Done button */
+    .desktop-commit-btn {
+        display: none !important;
+    }
+    .btn-done-mobile {
+        display: inline-block;
+        color: var(--text-main);
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    
+    .modal-box > *:not(.sticky-header) {
+        margin-left: 20px;
+        margin-right: 20px;
+        width: calc(100% - 40px) !important;
+    }
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 601px) {
+    .btn-done-mobile {
+        display: none;
+    }
+    .modal-header.sticky-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+}
+
+/* --- PREFERS REDUCED MOTION OVERRIDES --- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        transition-delay: 0s !important;
+    }
+}
+
+/* --- TOUCH OPTIMIZATIONS: HIDE TOOLTIP --- */
+@media (hover: none) {
+    .custom-tooltip, #crack-time-tooltip {
+        display: none !important;
+    }
+}
+
+/* --- WORD SEPARATOR PRESETS SIZE --- */
+.preset-btn.separator-btn {
+    font-size: 0.7rem !important;
+    padding: 6px 8px !important;
+    min-width: 48px;
+    text-align: center;
+}
+
+/* --- STICKY HEADER DESKTOP --- */
+@media (min-width: 601px) {
+    .modal-header.sticky-header {
+        position: relative;
+        background: var(--chassis-top);
+        z-index: 10;
+        margin-top: -28px;
+        margin-left: -28px;
+        margin-right: -28px;
+        padding: 28px 28px 16px 28px;
+        border-bottom: 2px solid #ff4f00;
+        margin-bottom: 20px;
+    }
+}
+
+/* --- COLLAPSIBLE advanced popup settings sections --- */
+.te-section-title.collapsible-title {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.15s ease;
+}
+
+.te-section-title.collapsible-title:hover {
+    color: var(--accent);
+}
+
+.advanced-group.collapsed {
+    display: none !important;
+}
+
+.toggle-indicator {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+}
+
+/* --- ADVANCED SETTINGS LAYOUT OPTIMIZATIONS --- */
+.advanced-group-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.separator-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.modal-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 0;
+}
+.modal-actions-grid button {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+}
+
+#session-log-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+}
+
+/* Dividers & hover states */
+.te-section-title.collapsible-title {
+    margin-top: 16px;
+}
+.advanced-group + .te-section-title.collapsible-title {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 20px;
+    margin-top: 20px;
+}
+body.dark-theme .advanced-group + .te-section-title.collapsible-title {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.te-toggle {
+    border-radius: 4px;
+    padding: 8px 8px !important;
+    margin: 0 -4px;
+    transition: background-color 0.15s ease;
+}
+.te-toggle:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+body.dark-theme .te-toggle:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* --- SESSION LOG SYSTEM EVENTS COLORS --- */
+.session-log-entry .log-warn {
+    color: var(--accent) !important;
+}
+.session-log-entry .log-success {
+    color: #0d9488 !important; /* teal/green for contrast in light mode */
+}
+body.dark-theme .session-log-entry .log-success {
+    color: #10b981 !important; /* emerald green in dark mode */
+}
+.session-log-entry .log-info {
+    color: #2563eb !important; /* blue in light mode */
+}
+body.dark-theme .session-log-entry .log-info {
+    color: #3b82f6 !important; /* bright blue in dark mode */
+}
+.session-log-entry .log-pwr-on {
+    color: #ff4f00 !important; /* Signature TE Orange */
+}
+.session-log-entry .log-pwr-off {
+    color: #888888 !important; /* Muted stone grey in light mode */
+}
+body.dark-theme .session-log-entry .log-pwr-off {
+    color: #62605b !important; /* Muted charcoal grey in dark mode */
+}
+
+/* --- TECHNICAL SPEC SHEET OVERVIEW, GUIDE & SECURITY SECTIONS --- */
+.description-block {
+    margin-top: 20px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+.description-title {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+    padding-bottom: 4px;
+}
+body.dark-theme .description-title {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+.description-text {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0;
+}
+.te-inline-link {
+    color: var(--text-muted) !important;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 700;
+    transition: color 0.15s ease;
+}
+.te-inline-link:hover {
+    color: var(--accent) !important;
+}
+/* --- DONATION / SUPPORT SECTION STYLES --- */
+.support-section {
+    margin: 16px 0 24px 0;
+    width: 100%;
+    text-align: left;
+}
+.support-header {
+    font-family: 'Space Grotesk', var(--font-din);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+    padding-bottom: 2px;
+    border-bottom: 1px dashed rgba(255, 79, 0, 0.15);
+    display: inline-block;
+}
+body.dark-theme .support-header {
+    border-bottom-color: rgba(255, 79, 0, 0.3);
+}
+.te-btn-donate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: var(--accent);
+    color: #ffffff;
+    font-family: var(--font-din);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 2px;
+    border: 1px solid var(--control-border);
+    box-shadow: var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #8b8883, inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+    cursor: pointer;
+}
+.te-btn-donate:hover {
+    background: #e04500;
+    color: #ffffff;
+}
+.te-btn-donate:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #8b8883, inset 0 1.5px 3px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .te-btn-donate {
+    box-shadow: var(--shadow-x, 0px) var(--shadow-y, 3px) 0 #12141c, inset 0 1px 0 rgba(255,255,255,0.15);
+}
+body.dark-theme .te-btn-donate:active {
+    box-shadow: 0 1px 0 #12141c, inset 0 1.5px 3px rgba(0,0,0,0.45);
+}
+
+/* --- STRUCTURED CARD GRID MANUALS --- */
+.guide-grid, .security-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+    margin-bottom: 24px;
+}
+.guide-card, .security-card {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--control-border);
+    border-radius: 3px;
+    padding: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+body.dark-theme .guide-card, body.dark-theme .security-card {
+    background: rgba(255, 255, 255, 0.015);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+
+
+.guide-card-header, .security-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--control-border);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+}
+body.dark-theme .guide-card-header, body.dark-theme .security-card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.guide-tag, .security-tag {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.65rem;
+}
+
+.guide-card-title, .security-card-title {
+    font-family: var(--font-din);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-main);
+}
+
+.guide-shortcut {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+.guide-card-bullets {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 6px;
+    padding-left: 4px;
+    font-size: 0.68rem;
+}
+.guide-card-bullets em {
+    font-style: normal;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+/* --- DESKTOP PROPORTIONS & DUAL COLUMN DATA SHEETS --- */
+@media (min-width: 601px) {
+    .modal-box {
+        max-width: 560px; /* Wider settings block */
+    }
+    .spec-box {
+        max-width: 700px !important; /* Wider datasheet block */
+        max-height: 70vh !important; /* Limit to 70% of viewport height on PC */
+        overflow-y: auto !important; /* Ensure vertical scrolling is active */
+    }
+    
+    .guide-grid, .security-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+}
+
+/* --- TACTILE KBD KEYCAP STYLING --- */
+kbd {
+    background: #ffffff;
+    border: 1px solid var(--control-border);
+    border-radius: 2px;
+    box-shadow: 0 1.5px 0 #aba9a3, inset 0 0.5px 0 rgba(255,255,255,0.6);
+    color: var(--text-main);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    margin: 0 2px;
+    display: inline-block;
+    vertical-align: middle;
+}
+body.dark-theme kbd {
+    background: #282c37;
+    border-color: #3a3f4f;
+    box-shadow: 0 1.5px 0 #13151a, inset 0 0.5px 0 rgba(255,255,255,0.05);
+    color: #f1f5f9;
+}
+
+/* Custom background for Advanced Settings popup header to match settings group background */
+#advanced-popup .modal-header.sticky-header {
+    background: #d8d6cf;
+    position: sticky;
+    z-index: 10;
+}
+body.dark-theme #advanced-popup .modal-header.sticky-header {
+    background: #13151a;
+}
+@media (max-width: 600px) {
+    #advanced-popup .modal-header.sticky-header,
+    body.dark-theme #advanced-popup .modal-header.sticky-header {
+        top: 0;
+        background: var(--bg-main);
+    }
+}
+@media (min-width: 601px) {
+    #advanced-popup .modal-header.sticky-header {
+        top: -30px;
+        margin-top: -30px;
+        margin-left: -30px;
+        margin-right: -30px;
+        padding: 30px 30px 18px 30px;
+        margin-bottom: 18px;
+    }
+}
+
+/* Settings Tab Layout (Mobile-first, stacked by default) */
+.settings-tab-layout {
+    display: flex;
+    flex-direction: column;
+}
+.settings-sidebar {
+    display: none;
+}
+.tab-content {
+    display: block !important;
+}
+.settings-footer {
+    margin-top: 24px;
+    width: 100%;
+}
+
+@media (min-width: 601px) {
+    /* Wide and compact settings box proportions on desktop */
+    #advanced-popup .modal-box {
+        max-width: 820px;
+        height: 700px;
+        max-height: calc(100vh - 40px);
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow-y: hidden;
+        padding: 30px;
+    }
+    
+    .settings-tab-layout {
+        display: flex;
+        flex-direction: row;
+        gap: 24px;
+        align-items: stretch;
+        margin-bottom: 8px;
+        flex: 1;
+        min-height: 0;
+    }
+    
+    .settings-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 170px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--control-border);
+        padding-right: 20px;
+        padding-top: 8px;
+    }
+    
+    .settings-content-pane {
+        flex-grow: 1;
+        min-width: 0;
+        padding: 16px 20px !important;
+        background: rgba(0, 0, 0, 0.012);
+        border: 1px solid var(--control-border);
+        border-radius: 4px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    body.dark-theme .settings-content-pane {
+        background: rgba(0, 0, 0, 0.15);
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .settings-content-pane::-webkit-scrollbar {
+        width: 6px;
+    }
+    .settings-content-pane::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .settings-content-pane::-webkit-scrollbar-thumb {
+        background: var(--control-border);
+        border-radius: 3px;
+    }
+    .settings-content-pane::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+    }
+    
+    /* On desktop, hide inactive tabs and show the active one */
+    .tab-content {
+        display: none !important;
+    }
+    .tab-content.active {
+        display: block !important;
+    }
+    
+    /* Technical category headers for slots */
+    #tab-presets, #tab-filters, #tab-system, #tab-logs {
+        position: relative;
+        padding-top: 24px !important;
+    }
+    #tab-presets::before, #tab-filters::before, #tab-system::before, #tab-logs::before {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        opacity: 0.5;
+    }
+    #tab-presets::before { content: "[ MODULE: 01 // MACRO PRESETS ]"; }
+    #tab-filters::before { content: "[ MODULE: 02 // ALGORITHMIC FILTERS ]"; }
+    #tab-system::before  { content: "[ MODULE: 03 // SYSTEM OPTIONS ]"; }
+    #tab-logs::before    { content: "[ MODULE: 04 // LIVE SYSTEM LOGS ]"; }
+
+    /* Sidebar tab selection buttons with unified orange color */
+    .tab-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-muted);
+        font-family: 'Space Mono', monospace;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-align: left;
+        padding: 10px 14px;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all 0.15s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        position: relative;
+    }
+    .tab-btn.active {
+        background: #ffffff;
+        border-color: var(--control-border);
+        box-shadow: 0 2px 0 #aba9a3;
+        color: var(--accent);
+    }
+    body.dark-theme .tab-btn.active {
+        background: #282c37;
+        border-color: #3a3f4f;
+        box-shadow: 0 2px 0 #13151a;
+    }
+    .tab-btn.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--accent);
+        border-radius: 2px 0 0 2px;
+    }
+    .tab-btn:hover {
+        color: var(--accent);
+        background: rgba(255, 79, 0, 0.04);
+    }
+    
+    /* Keep groups stacked vertically inside the tab content pane */
+    .advanced-group-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    /* Give settings rows inside modal more spacing on desktop */
+    #advanced-popup .te-toggle,
+    #advanced-popup .te-input-group {
+        padding: 12px 8px !important;
+        margin-bottom: 4px;
+    }
+
+    #advanced-popup .preset-grid {
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    #advanced-popup .preset-explanations {
+        padding: 16px !important;
+        margin-top: 16px !important;
+    }
+
+    .settings-footer {
+        margin-top: 20px !important;
+        border-top: 1px solid var(--control-border);
+        padding-top: 16px;
+        width: auto !important;
+    }
+    
+    /* Disable collapsible headers and hide indicators inside tabs on desktop */
+    #advanced-popup .toggle-indicator {
+        display: none !important;
+    }
+    #advanced-popup .te-section-title.collapsible-title {
+        cursor: default !important;
+        pointer-events: none;
+    }
+    #advanced-popup .advanced-group.collapsed {
+        display: block !important;
+    }
+    #advanced-popup .preset-grid.collapsed {
+        display: grid !important;
+    }
+    #advanced-popup .advanced-group-stack.collapsed {
+        display: flex !important;
+    }
+    #advanced-popup #session-log-container.collapsed {
+        display: flex !important;
+    }
+    
+    /* Hide redundant sub-headings on desktop since tab names represent them */
+    #advanced-popup .te-section-title {
+        display: none !important;
+    }
+}
+
+/* Unify all settings content buttons height, padding, fonts, and prevent text wrapping */
+#advanced-popup .preset-btn,
+#advanced-popup .btn-secondary,
+#advanced-popup .te-btn-hazard,
+#advanced-popup .te-btn-commit {
+    font-size: 0.72rem !important;
+    padding: 8px 12px !important;
+    height: 38px !important;
+    line-height: 20px !important;
+    font-family: 'Space Mono', monospace !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.te-cycle-btn {
+    width: 100% !important;
+}
+
+.disabled-toggle {
+    opacity: 0.45 !important;
+    pointer-events: none !important;
+}
+
+/* Custom confirm popup styling */
+#confirm-popup {
+    z-index: 110;
+}
+.confirm-box {
+    max-width: 420px !important;
+    padding: 24px !important;
+    text-align: left !important;
+}
+#confirm-popup .modal-header {
+    text-align: left !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 0 16px 0 !important;
+}
+.confirm-body {
+    margin: 16px 0 20px 0 !important;
+    width: 100% !important;
+}
+.confirm-message {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-align: left !important;
+}
+.confirm-actions {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-top: 18px;
+    width: 100% !important;
+}
+.confirm-actions button {
+    margin-bottom: 0 !important;
+    width: 47% !important;
+    height: 38px !important;
+    font-size: 0.72rem !important;
+    padding: 8px 12px !important;
+    line-height: 20px !important;
+    font-family: 'Space Mono', monospace !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+@media (max-width: 600px) {
+    #confirm-popup .modal-flex-container {
+        padding: 16px;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100%;
+        display: flex;
+    }
+    #confirm-popup .confirm-box {
+        width: 90% !important;
+        max-width: 380px !important;
+        height: auto !important;
+        max-height: calc(100vh - 32px) !important;
+        border-radius: 2px !important;
+        border: 1px solid var(--control-border) !important;
+        box-shadow: 
+            0 8px 0 #aba9a3,
+            0 12px 24px rgba(0,0,0,0.2),
+            inset 0 1px 0 rgba(255,255,255,0.5) !important;
+        overflow-y: visible !important;
+        padding: 20px !important; /* Slightly more compact padding on mobile */
+    }
+    #confirm-popup .te-modal-title {
+        text-align: left !important;
+        font-size: 1.05rem !important; /* Scale down title size for clean mobile layout */
+    }
+    #confirm-popup .te-modal-desc {
+        text-align: left !important;
+    }
+    body.dark-theme #confirm-popup .confirm-box {
+        box-shadow: 
+            0 8px 0 #12141c,
+            0 12px 24px rgba(0,0,0,0.5),
+            inset 0 1px 0 rgba(255,255,255,0.05) !important;
+    }
+}
+
+/* SKEUOMORPHIC SHINE HOVER EFFECT (UPGRADED LIGHT SPOTLIGHT) */
+.btn-primary,
+.btn-secondary,
+.te-btn-hazard,
+.te-btn-commit,
+.te-btn-donate,
+.mode-btn,
+.custom-checkbox,
+.preset-btn {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.btn-primary::after,
+.btn-secondary::after,
+.te-btn-hazard::after,
+.te-btn-commit::after,
+.te-btn-donate::after,
+.mode-btn::after,
+.custom-checkbox::after,
+.preset-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 65%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 5;
+}
+
+.has-specular-hover .btn-primary:hover::after,
+.has-specular-hover .btn-secondary:hover::after,
+.has-specular-hover .te-btn-hazard:hover::after,
+.has-specular-hover .te-btn-commit:hover::after,
+.has-specular-hover .te-btn-donate:hover::after,
+.has-specular-hover .mode-btn:hover::after,
+.has-specular-hover .custom-checkbox:hover::after,
+.has-specular-hover .preset-btn:hover::after {
+    opacity: 1;
+}
+
+/* CHASSIS BACKGROUND PATTERNS (DOTS / GRID / SOLID) */
+body.bg-grid {
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px) !important;
+}
+body.dark-theme.bg-grid {
+    background-image: 
+        linear-gradient(rgba(31, 36, 48, 0.7) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(31, 36, 48, 0.7) 1px, transparent 1px) !important;
+}
+
+body.bg-solid {
+    background-image: none !important;
+}
+
+/* SKEUOMORPHIC CHASSIS BACKGROUND PREVIEW BOX */
+.te-bg-preview {
+    width: 100%;
+    height: 38px;
+    border: 1px solid var(--control-border);
+    border-radius: 2px;
+    margin-top: 4px;
+    box-shadow: inset 0 1.5px 3px rgba(0, 0, 0, 0.12);
+    background-color: var(--bg-main);
+    background-size: 16px 16px;
+    transition: background-color 0.4s ease;
+}
+
+#bg-preview-box {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+}
+body.dark-theme #bg-preview-box {
+    background-image: radial-gradient(#1f2430 1px, transparent 1px);
+}
+
+.bg-grid #bg-preview-box {
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px) !important;
+}
+body.dark-theme.bg-grid #bg-preview-box {
+    background-image: 
+        linear-gradient(rgba(31, 36, 48, 0.7) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(31, 36, 48, 0.7) 1px, transparent 1px) !important;
+}
+
+.bg-solid #bg-preview-box {
+    background-image: none !important;
+}
+
+
+
+
+
+

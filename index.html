@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="theme-color-meta" content="#d3d1cb" />
+
+<title>Kagibox — K.B. II</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=2">
+<link rel="favicon" type="image/png" href="/favicon.png?v=2">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Antonio:wght@700&family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&family=Zilla+Slab:wght@700&family=Share+Tech+Mono&display=swap">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="power-off">
+
+<!-- STARTUP LOADING SCREEN -->
+<div id="loader-screen" class="grainy-plastic">
+    <!-- TE Minimal device blueprint wireframe -->
+    <svg width="80" height="120" viewBox="0 5 80 115" style="margin-bottom: 24px; opacity: 0.85;">
+        <!-- Outer casing -->
+        <rect x="5" y="10" width="70" height="100" rx="6" fill="none" stroke="var(--text-main)" stroke-width="1.8"/>
+        <!-- Corner screws -->
+        <circle cx="10" cy="15" r="1.5" fill="var(--text-main)"/>
+        <circle cx="70" cy="15" r="1.5" fill="var(--text-main)"/>
+        <circle cx="10" cy="105" r="1.5" fill="var(--text-main)"/>
+        <circle cx="70" cy="105" r="1.5" fill="var(--text-main)"/>
+        <!-- Screen window -->
+        <rect x="14" y="26" width="52" height="26" rx="2" fill="none" stroke="var(--text-main)" stroke-width="1.2"/>
+        <!-- Fader rail outline -->
+        <rect x="22" y="65" width="36" height="5" rx="2.5" fill="none" stroke="var(--text-main)" stroke-width="1.2"/>
+        <rect x="37" y="61" width="6" height="13" rx="1" fill="var(--text-main)"/>
+        <!-- Speaker dots -->
+        <circle cx="56" cy="17" r="0.6" fill="var(--text-main)"/>
+        <circle cx="60" cy="17" r="0.6" fill="var(--text-main)"/>
+        <circle cx="64" cy="17" r="0.6" fill="var(--text-main)"/>
+        <circle cx="56" cy="20" r="0.6" fill="var(--text-main)"/>
+        <circle cx="60" cy="20" r="0.6" fill="var(--text-main)"/>
+        <circle cx="64" cy="20" r="0.6" fill="var(--text-main)"/>
+    </svg>
+
+    <div class="progress-bar-container">
+        <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="loader-fill"></div>
+        </div>
+        <div class="progress-bar-label">
+            <span>SYSTEM INITIALIZE</span>
+            <span id="loader-percent">00%</span>
+        </div>
+    </div>
+    
+    <div class="boot-log-container">
+        <div id="boot-log">Powering cells...</div>
+    </div>
+</div>
+
+<div class="container-wrapper">
+    <!-- SKEUOMORPHIC BRAIDED POWER CABLE -->
+    <div class="braided-cable-container">
+        <svg class="braided-cable-svg" viewBox="0 0 2000 600" style="width:100%; height:100%;">
+            <defs>
+                <!-- Dynamic Gradient for the Cable Base -->
+                <linearGradient id="cable-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop class="cable-stop-1" offset="0%" />
+                    <stop class="cable-stop-2" offset="100%" />
+                </linearGradient>
+                <filter id="plug-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="-2" dy="3" stdDeviation="3" flood-opacity="0.3"/>
+                </filter>
+                
+                <!-- Highly realistic multi-layered light dispersion for TE style glow -->
+                <filter id="realistic-led-glow" x="-300%" y="-300%" width="700%" height="700%">
+                    <!-- Wide ambient scatter -->
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blurWide" />
+                    <!-- Tight hot core -->
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blurTight" />
+                    <!-- Merge them together for natural light falloff -->
+                    <feMerge>
+                        <feMergeNode in="blurWide" />
+                        <feMergeNode in="blurTight" />
+                    </feMerge>
+                </filter>
+            </defs>
+            <!-- Recessed Socket Cutout on Bezel (stationary) -->
+            <rect class="plug-socket" x="1996" y="32" width="6" height="16" rx="1.5" />
+            
+            <!-- Interactive Cable & Plug Assembly -->
+            <g id="cable-and-plug" style="cursor: pointer; transform-origin: 1950px 40px;">
+                <!-- Cable Shadow -->
+                <path class="cable-shadow-path" d="M 1950,40 C 1750,40 1600,400 -100,400" fill="none" stroke-width="8" stroke-linecap="round" />
+                <!-- Cable Base -->
+                <path d="M 1950,40 C 1750,40 1600,400 -100,400" fill="none" stroke="url(#cable-grad)" stroke-width="6.5" stroke-linecap="round" />
+                <!-- Dark Braided Cross Stitches -->
+                <path class="cable-dark-braid" d="M 1950,40 C 1750,40 1600,400 -100,400" fill="none" stroke-width="6.5" stroke-linecap="round" stroke-dasharray="4 6" />
+                <!-- Light Braided Highlights -->
+                <path class="cable-light-braid" d="M 1950,40 C 1750,40 1600,400 -100,400" fill="none" stroke-width="6.5" stroke-linecap="round" stroke-dasharray="3 7" stroke-dashoffset="5" />
+                
+                <!-- Glowing floor reflection -->
+                <circle class="plug-floor-glow" cx="1982" cy="40" r="10" fill="#10b981" filter="url(#realistic-led-glow)" />
+                
+                <!-- USB-C Plug Body -->
+                <g filter="url(#plug-shadow)">
+                    <!-- Metal tip disappearing into socket -->
+                    <rect class="plug-metal-tip" x="1994" y="34" width="4" height="12" rx="1" />
+                    <!-- Connector sleeve housing -->
+                    <rect class="plug-housing" x="1970" y="32" width="24" height="16" rx="2" />
+                    <!-- Strain relief boot -->
+                    <path class="plug-relief" d="M 1970,36 L 1950,37.5 L 1950,42.5 L 1970,44 Z" />
+                    <!-- Rib lines for physical look -->
+                    <line class="plug-rib-line" x1="1965" y1="36.5" x2="1965" y2="43.5" />
+                    <line class="plug-rib-line" x1="1960" y1="37" x2="1960" y2="43" />
+                    <line class="plug-rib-line" x1="1955" y1="37.5" x2="1955" y2="42.5" />
+                </g>
+                <!-- Glowing LED status light on connector -->
+                <circle class="plug-led" cx="1982" cy="40" r="1.5" />
+            </g>
+        </svg>
+    </div>
+
+    <!-- HARDWARE POWER SWITCH -->
+    <div class="power-switch-chassis" id="device-power-switch" role="button" aria-pressed="false" aria-label="Device Power Switch">
+        <span class="power-label-top">I</span>
+        <div class="power-switch-groove">
+            <div class="power-switch-knob off" id="power-knob"></div>
+        </div>
+        <span class="power-label-bottom">O</span>
+    </div>
+    <!-- AMBIENT LED GLOW (Unseen Diode) -->
+    <div class="ambient-led-glow" id="ambient-led"></div>
+
+    <div class="container device-off" role="main" aria-label="Password Generator Device">
+        <!-- corner screws -->
+        <div class="screw top-left"></div>
+        <div class="screw top-right"></div>
+        <div class="screw bottom-left"></div>
+        <div class="screw bottom-right"></div>
+
+        <header class="grainy-plastic">
+            <h1 id="brand-title">K.B. <span class="roman-numeral">II</span></h1>
+            <p class="desc" id="brand-desc">カ ギ ボ ッ ク ｽ</p>
+            <p class="subtitle">256-bit password generator</p>
+            <div class="speaker-grille"></div>
+            <!-- Direct access to Technical Specification Sheet / About -->
+            <a href="#" class="te-header-decal-link" id="btn-open-about-direct">[ SPEC.SHEET ]</a>
+        </header>
+
+        <div class="output-section" id="password-display-container" role="button" aria-label="Copy password to clipboard" tabindex="0">
+            <!-- Glowing background wave -->
+            <canvas id="oled-canvas" role="img" aria-label="OLED waveform display"></canvas>
+            
+            <div id="oled-mini-boot" style="display: none;">
+                <div id="oled-mini-log"></div>
+            </div>
+            
+            <div id="oled-overlay">
+                <div class="oled-corner-top-left" id="oled-mode">MODE: BATT</div>
+                <div class="oled-corner-top-right" id="oled-entr">CRYPTO: 0-BIT</div>
+                <div class="oled-success-text" id="oled-success">SUCCESS: KEY COPIED</div>
+            </div>
+
+            <p id="generated-password" aria-live="polite" aria-atomic="true" spellcheck="false" translate="no" autocorrect="off" autocapitalize="none" data-nosnippet>Initialize</p>
+            
+            <div class="strength-wrapper tooltip-container" id="strength-wrapper">
+                <div class="custom-tooltip" id="crack-time-tooltip">Crack time: -</div>
+                <div class="strength-meta">
+                    <span>Entropy Status</span>
+                    <span id="strength-text" aria-live="polite" aria-atomic="true">-</span>
+                </div>
+                <div class="strength-bar">
+                    <div id="strength-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                </div>
+                <p id="strength-feedback"></p>
+            </div>
+        </div>
+
+        <div class="controls-area grainy-plastic">
+            <div class="mode-capsule">
+                <button type="button" class="mode-btn active" id="randomMode">Random</button>
+                <button type="button" class="mode-btn" id="memorableMode">Phonetic</button>
+                <button type="button" class="mode-btn" id="pinMode">Numeric</button>
+            </div>
+
+            <form id="password-form">
+                <!-- Size control using mechanical fader -->
+                <div class="form-group">
+                    <div class="fader-container">
+                        <div class="fader-label-wrapper">
+                            <label for="length" id="fader-label">Size</label>
+                            <span class="length-val" id="length-num">20</span>
+                        </div>
+                        <input type="range" id="length" class="te-fader" min="5" max="39" value="20" />
+                    </div>
+                </div>
+
+                <div class="checkbox-grid">
+                    <label class="custom-checkbox">
+                        <span>A-Z</span>
+                        <input type="checkbox" id="uppercase" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <span>a-z</span>
+                        <input type="checkbox" id="lowercase" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <span>0-9</span>
+                        <input type="checkbox" id="numbers" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <span>/*!</span>
+                        <input type="checkbox" id="symbols" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn-primary" id="btn-generate">RUN GENERATION</button>
+                    <button type="button" class="btn-secondary" id="btn-open-settings">[ CFG.MATRIX ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal parameter matrix -->
+<div id="advanced-popup" class="modal-overlay">
+    <div class="modal-backdrop"></div>
+    <div class="modal-noise"></div>
+    <div class="modal-flex-container">
+        <div class="modal-box">
+        <div class="modal-header sticky-header">
+            <div>
+                <h2 class="te-modal-title">[SYS.CFG] MATRIX</h2>
+                <p class="te-modal-desc">STATUS: ONLINE_</p>
+            </div>
+            <button type="button" class="btn-done-mobile te-btn-outline" id="btn-close-settings-x">[X]</button>
+        </div>
+
+        <div class="settings-tab-layout">
+            <div class="settings-sidebar">
+                <button type="button" class="tab-btn active" data-tab="presets">/// PRESETS</button>
+                <button type="button" class="tab-btn" data-tab="filters">/// FILTERS</button>
+                <button type="button" class="tab-btn" data-tab="system">/// SYSTEM</button>
+                <button type="button" class="tab-btn" data-tab="logs">/// SESSION LOG</button>
+            </div>
+            
+            <div class="settings-content-pane">
+                <!-- Tab: Presets -->
+                <div class="tab-content active" id="tab-presets">
+                    <p class="te-section-title collapsible-title">
+                        <span>/// MACRO PRESETS</span>
+                        <span class="toggle-indicator">[-]</span>
+                    </p>
+                    <div class="advanced-group preset-grid">
+                        <button type="button" class="preset-btn" id="preset-default">Balanced</button>
+                        <button type="button" class="preset-btn" id="preset-security">Fortress</button>
+                        <button type="button" class="preset-btn" id="preset-compat">Legacy</button>
+                    </div>
+                    <div class="preset-explanations">
+                        <div class="preset-desc-item" id="desc-default" style="display: none;">
+                            <span class="preset-desc-title">Balanced Preset</span>
+                            <span class="preset-desc-text">Optimal balance between strength and readability. 20 characters, all groups active, omits ambiguous characters (1, I, 0, o).</span>
+                        </div>
+                        <div class="preset-desc-item" id="desc-security" style="display: none;">
+                            <span class="preset-desc-title">Fortress Preset</span>
+                            <span class="preset-desc-text">Maximum entropy and security. 24 characters, all character groups enabled with zero restrictions for uncompromised master keys.</span>
+                        </div>
+                        <div class="preset-desc-item" id="desc-compat" style="display: none;">
+                            <span class="preset-desc-title">Legacy Preset</span>
+                            <span class="preset-desc-text">Backward compatibility for older systems. 20 characters with no duplicate characters. Strips quotes and complex symbols that trigger legacy database validation errors.</span>
+                        </div>
+                        <div class="preset-desc-item" id="desc-custom" style="display: none;">
+                            <span class="preset-desc-title">Custom Configuration</span>
+                            <span class="preset-desc-text">Settings have been customized manually. Macro preset states are bypassed.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Filters -->
+                <div class="tab-content" id="tab-filters">
+                    <p class="te-section-title collapsible-title">
+                        <span>/// ALGORITHMIC FILTERS</span>
+                        <span class="toggle-indicator">[-]</span>
+                    </p>
+                    <div class="advanced-group advanced-group-stack">
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">HEX OVERRIDE</span>
+                                <span class="te-toggle-desc">HEXADECIMAL STRING FORCE</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="hexOnlyMode">
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">OMIT AMBIGUOUS</span>
+                                <span class="te-toggle-desc">STRIP TOKENS (I, L, 1, 0)</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="excludeAmbiguous" checked>
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+                        
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">NO REPETITION</span>
+                                <span class="te-toggle-desc">BLOCK SERIAL DUPLICATION</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="noDuplicates">
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+                        
+                        <div class="te-input-group">
+                            <span class="te-input-label">EXCLUDE CHARS</span>
+                            <div class="te-input-wrapper">
+                                <span class="te-prompt">&gt;</span>
+                                <input type="text" id="excludedChars" placeholder="e.g. &*%" class="te-terminal-input">
+                            </div>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">DICTIONARY TYPE</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-dictionary" data-prop="dictionaryType">DICT: BIP-39 EN</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">MINIMUM ENTROPY</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-entropy" data-prop="minEntropy">MIN. ENTROPY: OFF</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">WORD SEPARATOR</span>
+                            <div class="separator-preset-grid separator-grid">
+                                <button type="button" class="preset-btn separator-btn" data-sep="none">NONE</button>
+                                <button type="button" class="preset-btn separator-btn" data-sep="-">-</button>
+                                <button type="button" class="preset-btn separator-btn" data-sep="_">_</button>
+                                <button type="button" class="preset-btn separator-btn" data-sep=".">.</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: System -->
+                <div class="tab-content" id="tab-system">
+                    <p class="te-section-title collapsible-title">
+                        <span>/// SYSTEM SETTINGS</span>
+                        <span class="toggle-indicator">[-]</span>
+                    </p>
+                    <div class="advanced-group advanced-group-stack">
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">CHASSIS BACKLIGHT</span>
+                                <span class="te-toggle-desc">ENABLE GLOW EFFECTS</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="darkMode">
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+                        
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">MUTE AUDIO</span>
+                                <span class="te-toggle-desc">DISABLE SYNTHESIZER SOUNDS</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="muteAudio">
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+
+                        <label class="te-toggle">
+                            <div class="te-toggle-info">
+                                <span class="te-toggle-title">SPECULAR HOVER</span>
+                                <span class="te-toggle-desc">DYNAMIC LIGHT HOVER SHINE</span>
+                            </div>
+                            <div class="te-switch">
+                                <input type="checkbox" id="specularHover">
+                                <span class="te-slider"></span>
+                            </div>
+                        </label>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">AUDIO SYNTHESIZER</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-synth" data-prop="audioSynthType">SYNTH: WOOD TAP</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">HAPTIC FORCE</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-haptic" data-prop="hapticForce">HAPTIC: MEDIUM</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">OLED CONTRAST</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-contrast" data-prop="oledContrast">CONTRAST: HIGH</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">OLED RENDER MODE <span class="beta-badge">(BETA)</span></span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-render" data-prop="oledRenderMode">RENDER: OFF</button>
+                        </div>
+
+                        <div class="te-input-group">
+                            <span class="te-input-label">CHASSIS BACKGROUND</span>
+                            <button type="button" class="preset-btn te-cycle-btn" id="btn-cycle-bgstyle" data-prop="bgStyle">BG: DOTS</button>
+                            <div class="te-bg-preview" id="bg-preview-box"></div>
+                        </div>
+                    </div>
+
+                    <p class="te-section-title collapsible-title">
+                        <span>/// SYSTEM ACTIONS</span>
+                        <span class="toggle-indicator">[-]</span>
+                    </p>
+                    <div class="advanced-group advanced-group-stack">
+                        <div class="modal-actions-grid">
+                            <button type="button" class="btn-secondary" id="btn-export-txt">[ EXPORT.TXT ]</button>
+                            <button type="button" class="te-btn-hazard" id="btn-reset-defaults">[ RESET HARDWARE ]</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Logs -->
+                <div class="tab-content" id="tab-logs">
+                    <p class="te-section-title collapsible-title">
+                        <span>/// SESSION LOG</span>
+                        <span class="toggle-indicator">[+]</span>
+                    </p>
+                    <div class="advanced-group collapsed" id="session-log-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-footer">
+            <button type="button" class="te-btn-commit desktop-commit-btn" id="btn-commit-settings">[ COMMIT OVERRIDE ]</button>
+            <div style="text-align: center; margin-top: 16px;">
+                <a href="#" class="te-link" id="link-open-about">[ ABOUT K.B. II ]</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Technical Specification Sheet Modal -->
+<div id="about-popup" class="modal-overlay">
+    <div class="modal-backdrop"></div>
+    <div class="modal-noise"></div>
+    <div class="modal-flex-container">
+        <div class="modal-box spec-box">
+        <div class="modal-header sticky-header spec-header">
+            <div>
+                <h1>K.B. <span class="roman-numeral">II</span></h1>
+                <p class="desc">カ ギ ボ ッ ク ｽ</p>
+                <p class="subtitle">Specification Sheet</p>
+            </div>
+            <button type="button" class="btn-done-mobile te-btn-outline" id="btn-close-about-x">[X]</button>
+        </div>
+
+        <div class="specs-list">
+            <div class="spec-row">
+                <span class="spec-label">Device Name</span>
+                <span class="spec-value">Kagibox K.B. II</span>
+            </div>
+            <div class="spec-row">
+                <span class="spec-label">Chief Engineer</span>
+                <span class="spec-value">Matouš Jírovec</span>
+            </div>
+            <div class="spec-row">
+                <span class="spec-label">Design Language</span>
+                <span class="spec-value">Inspired by TE</span>
+            </div>
+            <div class="spec-row">
+                <span class="spec-label">System Type</span>
+                <span class="spec-value">256-bit Password Gen</span>
+            </div>
+            <div class="spec-row">
+                <span class="spec-label">Entropy Source</span>
+                <span class="spec-value">Web Crypto API (CSPRNG)</span>
+            </div>
+            <div class="spec-row">
+                <span class="spec-label">Chassis Edition</span>
+                <span class="spec-value">Dark Edition v2.1</span>
+            </div>
+        </div>
+
+        <div class="support-section">
+            <div class="support-header">/// VOLUNTARY SUPPORT PORT</div>
+            <button type="button" class="te-btn-donate" id="btn-stripe-donate">
+                DONATE TO DEVELOPER
+            </button>
+        </div>
+
+        <div class="description-block">
+            <div class="description-title">Overview</div>
+            <p class="description-text">
+                Kagibox K.B. II is a high-performance cryptographic key generation node engineered by Matouš Jírovec. Drawing heavy aesthetic inspiration from the iconic industrial design language of <a href="https://teenage.engineering" target="_blank" rel="noopener noreferrer" class="te-inline-link">Teenage Engineering</a>, it features a tactile, analog-inspired interface that delivers mathematically secure entropy through native browser APIs.
+            </p>
+        </div>
+
+        <div class="description-block">
+            <div class="description-title">Operation Guide</div>
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ PWR.SYS ]</span>
+                        <span class="guide-card-title">Power Toggle</span>
+                        <span class="guide-shortcut"><kbd>I</kbd> / <kbd>O</kbd></span>
+                    </div>
+                    <div class="guide-card-body">
+                        Flip physical switch to <kbd>I</kbd> to boot and run system check. Flip to <kbd>O</kbd> to zeroize display cells and pop physical keys.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ OP.MODE ]</span>
+                        <span class="guide-card-title">Mode Selection</span>
+                        <span class="guide-shortcut"><kbd>M</kbd></span>
+                    </div>
+                    <div class="guide-card-body">
+                        Cycle generator modes with key or select on rocker panel:
+                        <div class="guide-card-bullets">
+                            <span>▪ <em>Random:</em> Custom character pools.</span>
+                            <span>▪ <em>Phonetic:</em> Memorable BIP-39 lists.</span>
+                            <span>▪ <em>Numeric:</em> Optimized PIN code output.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ VAL.SLDR ]</span>
+                        <span class="guide-card-title">Tactile Fader</span>
+                        <span class="guide-shortcut">Slider</span>
+                    </div>
+                    <div class="guide-card-body">
+                        Slide fader along linear track to adjust target length (characters, memorized word blocks, or PIN digit sizes).
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ GEN.COMP ]</span>
+                        <span class="guide-card-title">Compute Keys</span>
+                        <span class="guide-shortcut"><kbd>Space</kbd></span>
+                    </div>
+                    <div class="guide-card-body">
+                        Press key or click `RUN GENERATION` to process raw entropy via mathematically unbiased rejection sampling.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ OUT.SYNC ]</span>
+                        <span class="guide-card-title">Clipboard Copy</span>
+                        <span class="guide-shortcut"><kbd>C</kbd> / Display</span>
+                    </div>
+                    <div class="guide-card-body">
+                        Tap VFD display glass or press key to copy key. Ambient status beacon flashes in rapid data transmission sequence.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ MEM.ZERO ]</span>
+                        <span class="guide-card-title">Purge Buffer</span>
+                        <span class="guide-shortcut"><kbd>P</kbd></span>
+                    </div>
+                    <div class="guide-card-body">
+                        Press key or click `PURGE BUFFER` to flush memory. Zeroizes variables and sweeps the OS clipboard clean.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ PWR.GRID ]</span>
+                        <span class="guide-card-title">Battery Mode</span>
+                        <span class="guide-shortcut">USB-C</span>
+                    </div>
+                    <div class="guide-card-body">
+                        Unplug USB-C cable to engage battery cells. Activates dimming power save and 15s deep sleep auto-timeout.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <span class="guide-tag">[ LED.TELM ]</span>
+                        <span class="guide-card-title">Strength Pulse</span>
+                        <span class="guide-shortcut">LED</span>
+                    </div>
+                    <div class="guide-card-body">
+                        Side LED beacon interval signals entropy levels: ranges from slow warning flash (3.2s) to secure pulse (0.4s).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description-block">
+            <div class="description-title">Security Architecture</div>
+            <div class="security-grid">
+                <div class="security-card">
+                    <div class="security-card-header">
+                        <span class="security-tag">[ CRYP.RNG ]</span>
+                        <span class="security-card-title">Entropy Node</span>
+                    </div>
+                    <div class="security-card-body">
+                        Utilizes standard 256-bit mathematical randomness gathered via browser-level <code>crypto.getRandomValues()</code> API, fully bypassing predictable linear seeds.
+                    </div>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-card-header">
+                        <span class="security-tag">[ MATH.MOD ]</span>
+                        <span class="security-card-title">Unbiased Modulo</span>
+                    </div>
+                    <div class="security-card-body">
+                        Implements rejection sampling to discard upper remainder overflow ranges. Eliminates modulo bias for mathematically uniform distribution.
+                    </div>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-card-header">
+                        <span class="security-tag">[ MEM.ZERO ]</span>
+                        <span class="security-card-title">Local Wiping</span>
+                    </div>
+                    <div class="security-card-body">
+                        Generated keys reside only in ephemeral JS memory. Calling the purge sequence writes empty strings to variables and zeroizes the host clipboard.
+                    </div>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-card-header">
+                        <span class="security-tag">[ CSP.SAND ]</span>
+                        <span class="security-card-title">CSP Sandboxing</span>
+                    </div>
+                    <div class="security-card-body">
+                        Strict meta headers isolate execution. Disables external stylesheet calls, inline script bindings, tracking pixels, and unauthorized server hooks.
+                    </div>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-card-header">
+                        <span class="security-tag">[ DEV.ISOL ]</span>
+                        <span class="security-card-title">Client Shielding</span>
+                    </div>
+                    <div class="security-card-body">
+                        Excludes key elements from device dictionary checks (<code>spellcheck="false"</code>) and automated translation blocks to block outbound telemetry.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn-primary" id="btn-close-about-bottom" style="width: 100%;">Return to Device</button>
+    </div>
+</div>
+</div>
+
+<!-- Custom Confirmation Dialog Modal -->
+<div id="confirm-popup" class="modal-overlay">
+    <div class="modal-backdrop"></div>
+    <div class="modal-noise"></div>
+    <div class="modal-flex-container">
+        <div class="modal-box confirm-box">
+            <div class="modal-header">
+                <div>
+                    <h2 class="te-modal-title">[SYS.WARN] FACTORY RESET</h2>
+                    <p class="te-modal-desc">ACTION REQUIRED_</p>
+                </div>
+            </div>
+            
+            <div class="confirm-body">
+                <p class="confirm-message">Are you sure you want to restore K.B. II to original factory defaults? This action will purge all saved configurations, matrices, and custom presets. The device will be restarted completely.</p>
+            </div>
+            
+            <div class="confirm-actions">
+                <button type="button" class="btn-secondary" id="btn-confirm-cancel">[ CANCEL ]</button>
+                <button type="button" class="te-btn-hazard" id="btn-confirm-reset">[ DESTRUCT ]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="bip39.js" defer></script>
+    <script src="app.js" defer></script>
+
+</body>
+</html>
