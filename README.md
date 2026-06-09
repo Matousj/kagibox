@@ -28,4 +28,4 @@ You can control the entire device workflow directly via mapped keyboard interact
 * `M` — Cycle algorithm modes (Random pool ➔ Phonetic BIP-39 words ➔ Numeric PIN).
 * `Slider` — Mechanical linear track to change target text length.
 
-Live Demo: https://matousj.github.io/K.B.II-2/
+Live Demo: https://matousj.github.io/kagibox/
