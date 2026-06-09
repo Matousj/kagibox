@@ -31,10 +31,11 @@
    
     /* Globální definice DIN fontu */
     --font-din: 'DIN 1451 Mittelschrift', 'DIN Alternate', 'DIN 1451', sans-serif;
+    --beta: #FF0000;
 }
 
 .beta-badge {
-    color: var(--accent);
+    color: var(--beta);
 }
 
 *{
